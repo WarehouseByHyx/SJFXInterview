@@ -10,6 +10,7 @@
 
 - [Olist Brazilian E-Commerce Public Dataset](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce)
 - [Marketing Funnel by Olist](https://www.kaggle.com/datasets/olistbr/marketing-funnel-olist)
+  若无法下载也可在data文件夹中获取，项目使用数据已全部上传
 
 主要数据表：
 
