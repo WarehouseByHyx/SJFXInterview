@@ -57,7 +57,7 @@ olist-ecommerce-analysis/
 ## 运行方式
 
 1. 准备 Python、Jupyter、Pandas、Matplotlib、Pyecharts、PyMySQL、Paramiko 和 sshtunnel 环境。
-2. 在 `config/.env` 中填写 SSH 和 MySQL 连接信息，真实密码不要写入 Notebook 或代码。
+2. 在 `config/.env` 中填写 SSH 和 MySQL 连接信息。
 3. 使用 VS Code、PyCharm 或 Jupyter 打开 `notebooks/olist_analysis.ipynb`。
 4. 按 Notebook 单元格顺序执行，完成数据读取、清洗、RFM 分层、统计分析和图表展示。
 
