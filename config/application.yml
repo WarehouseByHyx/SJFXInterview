@@ -1,0 +1,21 @@
+database:
+  mysql:
+    host: ${MYSQL_HOST}
+    port: ${MYSQL_PORT}
+    user: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+    database: ${MYSQL_DATABASE}
+    charset: utf8mb4
+    connect_timeout: 15
+    read_timeout: 600
+
+ssh:
+  enabled: ${SSH_ENABLED}
+  host: ${SSH_HOST}
+  port: ${SSH_PORT}
+  user: ${SSH_USER}
+  private_key: ${SSH_PRIVATE_KEY}
+  private_key_password: ${SSH_PRIVATE_KEY_PASSWORD}
+  remote_host: ${MYSQL_REMOTE_HOST}
+  remote_port: ${MYSQL_REMOTE_PORT}
+  host_key: ${SSH_HOST_KEY}
