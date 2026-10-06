@@ -83,10 +83,20 @@ olist-ecommerce-analysis/
 │  └─ exports/               # Matplotlib 静态图导出目录
 ├─ sql/
 │  └─ navicat_mysql8_import.sql   # 建表 + LOAD DATA 导入脚本
+├─ tools/
+│  └─ clean_notebook_outputs.py   # 提交前清空 notebook 输出
 ├─ requirements.txt          # Python 依赖
 ├─ .gitignore                # 排除 .env、.venv、原始数据等
 └─ README.md
 ```
+
+> **提交前先清空 notebook 输出。** 用 Jupyter/VS Code 跑过之后，`.ipynb` 会把图表、
+> 表格和执行时间戳一起存进文件；报错 traceback 里还带着本机绝对路径，不适合入库。
+> 提交前执行一次：
+>
+> ```bash
+> python tools/clean_notebook_outputs.py
+> ```
 
 ## 运行方式
 
