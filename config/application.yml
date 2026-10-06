@@ -5,9 +5,10 @@ database:
     user: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
     database: ${MYSQL_DATABASE}
-    charset: utf8mb4
-    connect_timeout: 15
-    read_timeout: 600
+    # 语法 ${环境变量:默认值}：未在 .env 中定义时回退到默认值
+    charset: ${MYSQL_CHARSET:utf8mb4}
+    connect_timeout: ${MYSQL_CONNECT_TIMEOUT:15}
+    read_timeout: ${MYSQL_READ_TIMEOUT:600}
 
 ssh:
   enabled: ${SSH_ENABLED}
