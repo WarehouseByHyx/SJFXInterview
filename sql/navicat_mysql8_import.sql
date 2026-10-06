@@ -18,11 +18,13 @@
 --   geolocation 的重复行不会改变 notebook 结果（按邮编取 AVG 可去重），
 --   但 order_reviews 的重复会放大评价统计，closed_deals 会放大成交数。
 
-CREATE DATABASE IF NOT EXISTS olist
+-- 注意：库名需与 config/.env 的 MYSQL_DATABASE 保持一致。
+-- 当前项目使用 olist_ecommerce；若你建库时用了别的名字，改这两处即可。
+CREATE DATABASE IF NOT EXISTS olist_ecommerce
   DEFAULT CHARACTER SET utf8mb4
   DEFAULT COLLATE utf8mb4_unicode_ci;
 
-USE olist;
+USE olist_ecommerce;
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;

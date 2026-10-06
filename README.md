@@ -15,6 +15,22 @@
 
 `customers`、`orders`、`order_items`、`order_payments`、`order_reviews`、`products`、`sellers`、`geolocation`、`product_category_translation`、`marketing_qualified_leads`、`closed_deals`。
 
+### 表关系图
+
+![Olist 数据库表关系与字段说明](docs/olist_erd.png)
+
+上图为 11 张表的完整关系与字段说明（SVG 矢量版见 [`docs/olist_erd.svg`](docs/olist_erd.svg)）。
+图中标注了每张表的主键、外键以及每个字段的中文含义。
+
+几点容易踩的坑，图上也有标注：
+
+- `orders.customer_id` 与 `customers.customer_id` 是 **1:1**（99,441 行对 99,441 个 `customer_id`），
+  即每笔订单单独分配一个客户编号；要按「人」统计必须用 `customer_unique_id`（仅 96,096 个，差额即复购）。
+- `geolocation` **没有主键**：100 万行只对应 19,015 个邮编，同一邮编有多个坐标。
+  客户邮编与它的匹配率约 99.0%，属于按值推断的连接，不是数据库层的外键。
+- `order_reviews` 对 `orders` 不是严格 1:1：99,224 条评价对应 98,673 个订单，所以代码里按订单取评分均值。
+- `closed_deals.seller_id` 只有 380/842 能在 `sellers` 表命中（联盟卖家不在该表），因此不能把它当常规外键使用。
+
 ## 分析内容
 
 Notebook 共 11 节，编号与内容一一对应：
