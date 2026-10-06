@@ -17,20 +17,30 @@
 
 ## 分析内容
 
-1. **数据清洗**：处理缺失值、重复记录、日期格式和异常数据，统一字段类型。
-2. **指标构建**：基于有效订单计算订单量、GMV、客单价、复购率、准时交付率和营销转化率。
-3. **订单分析**：统计订单量、销售额、客单价、订单状态和支付方式。
-4. **商品分析**：分析商品类别、销量、销售额及热销品类。
-5. **卖家分析**：比较卖家订单量、销售额和运费占比表现（3D 散点图）。
-6. **州域分析**：按客户所在州统计订单量、GMV 与客户规模。
-7. **用户 RFM 分层**：
-   - `R`（Recency）：用户最近一次下单距分析截止日的天数；
-   - `F`（Frequency）：用户订单数量；
-   - `M`（Monetary）：用户累计消费金额。
+Notebook 共 11 节，编号与内容一一对应：
 
-   根据 R、F、M 五分位评分，将用户划分为核心客户、忠诚客户、高消费客户、新近客户、流失风险客户等群体。
-8. **营销漏斗分析**：基于 `mql_id` 和 `closed_deals` 分析线索与成交情况。
-9. **可视化展示**：使用 Matplotlib 输出静态图表，使用 Pyecharts 输出可交互的二维和三维图表。
+| 节 | 内容 | 主要产出 |
+| --- | --- | --- |
+| 1 | 分析目标 | — |
+| 2 | 连接数据库（SSH 隧道 / 直连） | `RAW`：11 张源表 |
+| 3 | 数据清洗 | `DATA`、`CLEANING_AUDIT` |
+| 4 | 指标构建 | `ANALYSIS` |
+| 5 | 可视化函数 | 图表构造函数 |
+| 6 | 月度趋势 | 月度订单数、商品销售额、客户数 |
+| 7 | 商品品类分析 | Top N 品类（金额 / 件数 / 订单数） |
+| 8 | 州域、客户地理分布与营销渠道 | 州域散点、地理分布散点、渠道转化率 |
+| 9 | 中文字体与 Matplotlib 导出 | `notebooks/exports/*.png` |
+| 10 | 客户 RFM 分群 | 分群汇总与明细 |
+| 11 | 业务结论 | 关键发现汇总 |
+
+### 关键字段口径
+
+- `item_gmv`：商品销售额，只累计 `order_items.price`，**不含**运费；
+- `payment_value`：订单实付金额，取自 `order_payments.payment_value`，**含**运费；
+- `freight_value`：运费，来自 `order_items.freight_value`；
+- `item_count`：商品件数，按 `order_items.order_item_id` 计数；
+- 有效订单：`order_status` 不属于 `PARAMS["excluded_statuses"]` 的订单；
+- 客户粒度：统一使用 `customer_unique_id`，因为 `customer_id` 会随订单变化。
 
 ## 技术栈
 
@@ -47,7 +57,7 @@
 ```text
 olist-ecommerce-analysis/
 ├─ config/
-│  ├─ application.yml        # 配置占位符（${VAR} 形式）
+│  ├─ application.yml        # 配置占位符（${VAR} / ${VAR:默认值}）
 │  ├─ .env.example           # 可提交的配置模板
 │  └─ .env                   # 本地真实连接配置，已被 .gitignore 排除
 ├─ data/
@@ -61,9 +71,6 @@ olist-ecommerce-analysis/
 ├─ .gitignore                # 排除 .env、.venv、原始数据等
 └─ README.md
 ```
-
-> `notebooks/olist_analysis_rebuild.ipynb` 是早期带执行输出的历史版本，已不再维护；
-> 请统一使用 `notebooks/olist_analysis.ipynb`。
 
 ## 运行方式
 
@@ -84,17 +91,22 @@ olist-ecommerce-analysis/
 
 4. 使用 VS Code、PyCharm 或 Jupyter 打开 `notebooks/olist_analysis.ipynb`。
 
-5. 按 Notebook 单元格顺序执行：2.1 连接数据库 → 3 清洗 → 5 指标构建 → 6 可视化函数
-   → 7–11 图表与 RFM → 12 业务结论。
+5. 按 Notebook 单元格顺序执行：第 2 节连接数据库 → 第 3 节清洗 → 第 4 节指标构建
+   → 第 5 节可视化函数 → 第 6–10 节图表与 RFM → 第 11 节业务结论。
 
 ## 指标口径
 
-- 销售额：订单明细中的商品金额与运费金额按项目分析口径统计。
-- 订单量：按有效订单编号去重统计。
-- 客单价：销售额除以订单量。
-- 用户消费金额：按用户汇总其有效订单明细金额。
-- RFM：以数据中有效订单的最大订单日期作为分析截止日进行计算。
-- 线索转化率：成交线索数除以营销合格线索数，仅用于描述性分析。
+- 商品销售额（`item_gmv`）：只累计订单明细中的商品金额 `order_items.price`，不含运费。
+- 实付金额（`payment_value`）：订单支付表的 `payment_value` 合计，含运费。
+- 运费（`freight_value`）：订单明细中的运费合计。
+- 订单量（`valid_orders`）：按有效订单编号 `order_id` 去重统计。
+- 客单价（`aov`）：`item_gmv` 除以有效订单数。
+- 客户消费金额（`monetary`）：按 `customer_unique_id` 汇总其有效订单的 `payment_value`。
+- 复购率（`repeat_rate`）：同一 `customer_unique_id` 下单 ≥ 2 次的比例。
+- 准时率（`on_time_rate`）：实际送达日期 ≤ 预计送达日期；仅在两个日期都非空的订单子集上计算，
+  否则未送达订单会被误判为「不准时」。
+- RFM：以有效订单的最大下单日期加 1 天作为分析截止日。
+- 线索转化率（`mql_conversion`）：成交线索数除以营销合格线索数，仅用于描述性分析。
 
 ## 项目限制
 
